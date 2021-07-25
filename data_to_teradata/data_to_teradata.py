@@ -39,7 +39,7 @@ class upload_to_tera:
         return True
     
     
-    def insert(self, q, df):
+    def insert(self, df):
         """
         1. Insert into tmp table.
         2. *In tera* insert into main table
@@ -55,7 +55,6 @@ class upload_to_tera:
 #                         cur.execute(q, df.values.tolist())
                 cur.execute(q, df.values.tolist())       
                 cur.execute("insert into {0} sel * from {1}".format(self.main_table_name, self.tmp_table_name))
-                b = cur.execute("sel count(*) from {0}".format(self.main_table_name)).fetchall()[0]
                 cur.execute("delete {0}".format(self.tmp_table_name))
                 self.num += len(df)
                 print("{0} lines were added out of {1}".format(str(self.num), str(len(self.df))))
@@ -82,7 +81,7 @@ class upload_to_tera:
             if len(df) > 300000 or df.memory_usage(deep=True).sum() > self.memory:
                 raise Exception("batch request")
             try:
-                self.insert(self.q, df)
+                self.insert(df)
                 
             except Exception as ex:
                 if 'string contains an untranslatable character' in str(ex):
